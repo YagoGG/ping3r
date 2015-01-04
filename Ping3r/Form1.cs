@@ -64,7 +64,14 @@ namespace WindowsFormsApplication2
                 // Memory releasing
                 pingSender = null;
                 reply = null;
-                GC.Collect();
+                GC.Collect(); 
+                hostName = GetHost();
+            }
+
+            public string GetHost()
+            {
+                IPHostEntry hostEntry = Dns.GetHostEntry(ip);
+                return hostEntry.HostName;
             }
         }
 
@@ -74,7 +81,6 @@ namespace WindowsFormsApplication2
             tv_results.BeginUpdate();
             for (byte net = 0; net <= 2; net++)
             {
-                //tv_results.Nodes.Add("Group 192.168." + net + ".*");
                 for (byte i = 0; i <= 254; i++)
                 {
                     if (devicesArray[net, i].available == true) // Is available
@@ -105,10 +111,7 @@ namespace WindowsFormsApplication2
                     netDevices[net, i] = new Device();
 
                     netDevices[net, i].ip = "192.168." + net + "." + i;
-
-                    Debug.Write("Pinging device 192.168." + net + "." + i + "...\n");
-
-                    /*  MULTITHREADING SYSTEM  */
+                    // Multithreading system (for faster completion)
                     Thread devThread = new Thread(new ThreadStart(netDevices[net, i].IsUP));
                     devThread.Start();
                 }
