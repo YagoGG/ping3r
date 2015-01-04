@@ -17,17 +17,17 @@ using System.Threading;
 
 using System.Diagnostics;   // DEBUG
 
-namespace WindowsFormsApplication2 
+namespace WindowsFormsApplication2
 {
 
-    public partial class MainForm : Form 
+    public partial class MainForm : Form
     {
-        public MainForm() 
+        public MainForm()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e) 
+        private void Form1_Load(object sender, EventArgs e)
         {
             if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable() == true)
             {
@@ -40,6 +40,9 @@ namespace WindowsFormsApplication2
                 lb_netstatus.Text = "DOWN! (no network detected)";
                 lb_netstatus.ForeColor = Color.Red;
             }
+            ImageList imglist = new ImageList();
+            imglist.Images.Add(Image.FromFile("nodeimg.png"));
+            tv_results.ImageList = imglist;
         }
 
         public class Device
@@ -65,12 +68,37 @@ namespace WindowsFormsApplication2
             }
         }
 
+        void UpdateTree(Device[,] devicesArray)
+        {
+            tv_results.Nodes.Clear();
+            tv_results.BeginUpdate();
+            for (byte net = 0; net <= 2; net++)
+            {
+                //tv_results.Nodes.Add("Group 192.168." + net + ".*");
+                for (byte i = 0; i <= 254; i++)
+                {
+                    if (devicesArray[net, i].available == true) // Is available
+                    {
+                        if (devicesArray[net, i].hostName != null)  // Has got hostname
+                        {
+                            tv_results.Nodes.Add(devicesArray[net, i].ip + " (" + devicesArray[net, i].hostName + ")");
+                        }
+                        else
+                        {
+                            tv_results.Nodes.Add(devicesArray[net, i].ip);
+                        }
+                    }
+                }
+            }
+            tv_results.EndUpdate();
+        }
+
         private void bt_run_Click(object sender, EventArgs e)
         {
             double progress = 0;    // Progress bar variable
             Device[,] netDevices = new Device[255, 255];  // Network devices array
 
-            for (byte net = 0; net <= 254; net++)
+            for (byte net = 0; net <= 2; net++)
             {
                 for (byte i = 0; i <= 254; i++)
                 {
@@ -89,6 +117,7 @@ namespace WindowsFormsApplication2
                 pb_progress.Value = (int)Math.Round(progress);
             }
             pb_progress.Value = 100;    // Set progress bar to full (because of precission loss on 0.39 additions)
+            UpdateTree(netDevices);
         }
     }
 }

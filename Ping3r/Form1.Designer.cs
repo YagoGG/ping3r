@@ -77,6 +77,7 @@
             // 
             // tv_results
             // 
+            this.tv_results.ItemHeight = 21;
             this.tv_results.Location = new System.Drawing.Point(21, 76);
             this.tv_results.Name = "tv_results";
             this.tv_results.Size = new System.Drawing.Size(496, 122);
