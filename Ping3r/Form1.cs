@@ -29,6 +29,7 @@ namespace WindowsFormsApplication2
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            // Checking for a network connection
             if (System.Net.NetworkInformation.NetworkInterface.GetIsNetworkAvailable() == true)
             {
                 lb_netstatus.Text = "UP! (everything OK)";
@@ -40,6 +41,8 @@ namespace WindowsFormsApplication2
                 lb_netstatus.Text = "DOWN! (no network detected)";
                 lb_netstatus.ForeColor = Color.Red;
             }
+
+            // Setting treeview icons
             ImageList imglist = new ImageList();
             imglist.Images.Add(Image.FromFile("nodeimg.png"));
             tv_results.ImageList = imglist;
@@ -50,36 +53,37 @@ namespace WindowsFormsApplication2
             public String ip;
             public String hostName = null;
             public bool available = false;
+
             public Ping pingSender = new Ping();
             public PingReply reply;
 
             public void IsUP() // Pings this device, to know if it's up or down
             {
                 reply = pingSender.Send(ip, 2000);
-                if (reply.Status == IPStatus.Success)
+                if (reply.Status == IPStatus.Success)   // Successful ping (device is up)
                 {
                     available = true;
                 }
 
-                // Memory releasing
+                // Memory releasing (garbage collection)
                 pingSender = null;
                 reply = null;
-                GC.Collect(); 
-                hostName = GetHost();
+                hostName = GetHost();   // Host reading before garbage collection, to avoid wasting memory with empty "hostName" fields
+                GC.Collect();
             }
 
-            public string GetHost()
+            public string GetHost() // Gets, if possible, this device's name
             {
                 IPHostEntry hostEntry = Dns.GetHostEntry(ip);
                 return hostEntry.HostName;
             }
         }
 
-        void UpdateTree(Device[,] devicesArray)
+        void UpdateTree(Device[,] devicesArray) // Places results in the treeview
         {
             tv_results.Nodes.Clear();
             tv_results.BeginUpdate();
-            for (byte net = 0; net <= 2; net++)
+            for (byte net = 0; net <= 254; net++)
             {
                 for (byte i = 0; i <= 254; i++)
                 {
@@ -104,7 +108,7 @@ namespace WindowsFormsApplication2
             double progress = 0;    // Progress bar variable
             Device[,] netDevices = new Device[255, 255];  // Network devices array
 
-            for (byte net = 0; net <= 2; net++)
+            for (byte net = 0; net <= 254; net++)
             {
                 for (byte i = 0; i <= 254; i++)
                 {
@@ -120,6 +124,7 @@ namespace WindowsFormsApplication2
                 pb_progress.Value = (int)Math.Round(progress);
             }
             pb_progress.Value = 100;    // Set progress bar to full (because of precission loss on 0.39 additions)
+
             UpdateTree(netDevices);
         }
     }
